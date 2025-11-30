@@ -1,85 +1,64 @@
 # coordinator.py
-import os
-import subprocess
-import time
-import json
-import signal
-import sys
+from utils.logging_config import setup_logging
+from utils.config import load_config
+from utils.health import NodeRegistry
+from utils.exceptions import NodeNotFoundError
 
-from main import node1
-
-ROOT = os.path.dirname(os.path.abspath(__file__))
-NODES_DIR = os.path.join(ROOT, "nodes")
-PYTHON = sys.executable  # use same python interpreter
-NODE_SCRIPT = os.path.join(ROOT, "node_service.py")
-
-
-def prepare_node_dir(node_name):
-    d = os.path.join(NODES_DIR, node_name)
-    os.makedirs(d, exist_ok=True)
-    return d
-
-def launch_nodes(n=5, start_port=8001, capacity_mb=100):
-    procs = []
-    peers = []
-    for i in range(n):
-        node_name = f"node{i+1}"
-        storage = prepare_node_dir(node_name)
-        port = start_port + i
-        # Node args
-        args = [PYTHON, NODE_SCRIPT,
-                "--node-id", node_name,
-                "--host", "0.0.0.0",
-                "--port", str(port),
-                "--storage-path", storage,
-                "--capacity-mb", str(capacity_mb)]
-        print("Launching", " ".join(args))
-        p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        procs.append((node_name, port, p))
-        peers.append({"host": "127.0.0.1", "port": port})
-        time.sleep(0.2)  # slight stagger
-
-    # Give nodes some time to start
-    time.sleep(2)
-    print("All nodes launched. Writing peers list to nodes/peers.json")
-    with open(os.path.join(NODES_DIR, "peers.json"), "w") as f:
-        json.dump(peers, f, indent=2)
-
-    print("Coordinator controls:")
-    print(" - To stop all nodes: press Ctrl-C here or run kill on each PID")
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Stopping nodes...")
-        for name, port, p in procs:
-            try:
-                p.send_signal(signal.SIGINT)
-            except Exception:
-                try:
-                    p.terminate()
-                except Exception:
-                    pass
-        print("Stopped.")
-
-
-def replicate(self, key, data, exclude_node=None):
-    nodes = self.select_nodes_for_replication(exclude_node, count=self.cfg["network"]["replication_factor"])
-    for n in nodes:
-        self.network.send_message("coordinator", n, "replicate", {"key": key, "data": data})
-
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--nodes", type=int, default=5)
-    parser.add_argument("--start-port", type=int, default=8001)
-    parser.add_argument("--capacity-mb", type=int, default=100)
-    args = parser.parse_args()
-    os.makedirs(NODES_DIR, exist_ok=True)
-    launch_nodes(n=args.nodes, start_port=args.start_port, capacity_mb=args.capacity_mb)
+log_getter = setup_logging()
+logger = log_getter(__name__)
 
 
 class Coordinator:
-    
-    pass
+    """
+    Central controller of TRACE-MUSIC.
+    Handles node registration, heartbeats, and replication.
+    """
+
+    def __init__(self, network):
+        self.network = network
+        self.cfg = load_config()
+
+        self.registry = NodeRegistry()
+
+        logger.info("Coordinator initialized")
+
+    def add_node(self, node):
+        self.network.add_node(node)
+        self.registry.mark_seen(node.node_id)
+        logger.info(f"Coordinator registered node '{node.node_id}'")
+
+    def list_nodes(self):
+        return list(self.network.nodes.keys())
+
+    def on_message(self, message):
+        """
+        Coordinator receives messages (e.g., heartbeats).
+        """
+        if message.type == "heartbeat":
+            self.registry.mark_seen(message.src)
+            logger.debug(f"Heartbeat received from {message.src}")
+
+    def replicate(self, key, data, exclude_node=None):
+        R = self.cfg["network"]["replication_factor"]
+        nodes = [
+            n for n in self.network.nodes
+            if n != exclude_node
+        ][:R]
+
+        logger.info(f"Replicating '{key}' to {nodes}")
+
+        for n in nodes:
+            self.network.send_message("coordinator", n, "replicate", {
+                "key": key,
+                "data": data
+            })
+
+    def check_node_health(self):
+        """
+        Called periodically to detect dead nodes.
+        """
+        timeout = self.cfg["node"]["heartbeat_timeout"]
+        dead_nodes = self.registry.stale_nodes(timeout)
+
+        for node_id in dead_nodes:
+            logger.warning(f"Node '{node_id}' is offline")
