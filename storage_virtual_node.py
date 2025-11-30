@@ -5,6 +5,44 @@ from typing import Dict, List, Optional, Union
 from enum import Enum, auto
 import hashlib
 
+
+# storage_virtual_node.py (snippet)
+from .storage_node_base import StorageNodeBase
+import os
+
+class StorageVirtualNode(StorageNodeBase):
+    def __init__(self, node_id, ):
+        super().__init__(node_id)
+        # create node data dir
+        self.data_dir = f"./data/{self.node_id}"
+        os.makedirs(self.data_dir, exist_ok=True)
+
+    def _path(self, key):
+        safe = key.replace("/", "_")
+        return os.path.join(self.data_dir, safe)
+
+    def store(self, key: str, data: bytes) -> bool:
+        try:
+            with open(self._path(key), "wb") as fh:
+                fh.write(data)
+            return True
+        except Exception:
+            return False
+
+    def retrieve(self, key: str) -> bytes | None:
+        p = self._path(key)
+        if not os.path.exists(p):
+            return None
+        with open(p, "rb") as fh:
+            return fh.read()
+
+    def delete(self, key: str) -> bool:
+        try:
+            os.remove(self._path(key))
+            return True
+        except FileNotFoundError:
+            return False
+
 class TransferStatus(Enum):
     PENDING = auto()
     IN_PROGRESS = auto()

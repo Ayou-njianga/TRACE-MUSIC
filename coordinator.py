@@ -6,10 +6,13 @@ import json
 import signal
 import sys
 
+from main import node1
+
 ROOT = os.path.dirname(os.path.abspath(__file__))
 NODES_DIR = os.path.join(ROOT, "nodes")
 PYTHON = sys.executable  # use same python interpreter
 NODE_SCRIPT = os.path.join(ROOT, "node_service.py")
+
 
 def prepare_node_dir(node_name):
     d = os.path.join(NODES_DIR, node_name)
@@ -59,6 +62,13 @@ def launch_nodes(n=5, start_port=8001, capacity_mb=100):
                     pass
         print("Stopped.")
 
+
+def replicate(self, key, data, exclude_node=None):
+    nodes = self.select_nodes_for_replication(exclude_node, count=self.cfg["network"]["replication_factor"])
+    for n in nodes:
+        self.network.send_message("coordinator", n, "replicate", {"key": key, "data": data})
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -68,3 +78,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     os.makedirs(NODES_DIR, exist_ok=True)
     launch_nodes(n=args.nodes, start_port=args.start_port, capacity_mb=args.capacity_mb)
+
+
+class Coordinator:
+    
+    pass

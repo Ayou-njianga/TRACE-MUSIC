@@ -7,6 +7,8 @@ import time
 from typing import Optional
 
 from flask import Flask, jsonify, request, send_file, abort
+
+from main import logger
 from virtual_disk import VirtualDisk, VirtualDiskError
 import requests
 
@@ -15,6 +17,15 @@ node_info = {}
 disk: Optional[VirtualDisk] = None
 peers = set()
 peers_lock = threading.RLock()
+
+
+def on_message(self, message):
+    logger.debug("Node %s received %s", self.node_id, message.type)
+    if message.type == "heartbeat":
+        self.handle_heartbeat(message)
+    elif message.type == "replicate":
+        self.store(message.payload['key'], message.payload['data'])
+
 
 @app.route("/status", methods=["GET"])
 def status():

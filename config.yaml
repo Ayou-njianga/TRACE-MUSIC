@@ -1,0 +1,15 @@
+network:
+  replication_factor: 2
+  default_bandwidth: 1000
+
+paths:
+  data_dir: "./data"
+  logs_dir: "./logs"
+
+logging:
+  level: INFO
+  file: "./logs/trace-music.log"
+
+node:
+  heartbeat_interval: 5   # seconds
+  heartbeat_timeout: 15   # seconds

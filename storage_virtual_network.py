@@ -4,6 +4,25 @@ import time
 from storage_virtual_node import StorageVirtualNode, FileTransfer, TransferStatus
 from collections import defaultdict
 
+
+# storage_virtual_network.py (add this small API)
+class Message:
+    def __init__(self, src, dest, mtype, payload):
+        self.src = src
+        self.dest = dest
+        self.type = mtype
+        self.payload = payload
+
+class StorageVirtualNetwork:
+    ...
+    def send_message(self, src_id, dest_id, mtype, payload):
+        if dest_id not in self.nodes:
+            raise KeyError("Unknown node")
+        msg = Message(src_id, dest_id, mtype, payload)
+        # optionally simulate latency here
+        self.nodes[dest_id].on_message(msg)
+
+
 class StorageVirtualNetwork:
     def __init__(self):
         self.nodes: Dict[str, StorageVirtualNode] = {}
