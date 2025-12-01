@@ -5,6 +5,7 @@ from utils.logging_config import setup_logging
 from utils.decorators import log_exceptions
 from utils.config import load_config
 from utils.heartbeat_sender import HeartbeatSender
+from utils.hash_utils import compute_hash, compute_file_hash
 
 cfg = load_config()
 log_getter = setup_logging()
@@ -50,7 +51,13 @@ class StorageVirtualNode(StorageNodeBase):
         try:
             with open(self._path(key), "wb") as fh:
                 fh.write(data)
-            logger.info(f"[{self.node_id}] Stored '{key}'")
+
+            hash_value = compute_hash(data)
+            logger.info(f"[{self.node_id}] Stored '{key}' (hash={hash_value})")
+
+            # store hash in metadata file
+            (self._path(key).with_suffix(".hash")).write_text(hash_value)
+
             return True
         except Exception as e:
             logger.error(f"[{self.node_id}] Storage failure for '{key}': {e}")
@@ -74,6 +81,25 @@ class StorageVirtualNode(StorageNodeBase):
         except FileNotFoundError:
             logger.warning(f"[{self.node_id}] Tried to delete missing key '{key}'")
             return False
+
+    def verify_integrity(self, key: str) -> bool:
+        """
+        Compare stored hash file with recomputed hash.
+        Returns True if file integrity OK.
+        """
+        data_path = self._path(key)
+        hash_path = data_path.with_suffix(".hash")
+
+        if not data_path.exists() or not hash_path.exists():
+            logger.warning(f"[{self.node_id}] Integrity check failed: missing file or hash")
+            return False
+
+        stored_hash = hash_path.read_text().strip()
+        computed = compute_file_hash(data_path)
+
+        logger.info(f"[{self.node_id}] Integrity check for '{key}': stored={stored_hash}, computed={computed}")
+
+        return stored_hash == computed
 
     def on_message(self, message):
         """
