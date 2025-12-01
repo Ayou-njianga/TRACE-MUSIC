@@ -24,8 +24,10 @@ class StorageVirtualNetwork:
         logger.info("StorageVirtualNetwork initialized")
 
     def add_node(self, node):
+        node.network = self
         self.nodes[node.node_id] = node
         logger.info(f"Node '{node.node_id}' joined the network")
+        node.heartbeat.start()  # start heartbeat thread
 
     def get_node(self, node_id):
         if node_id not in self.nodes:

@@ -27,8 +27,11 @@ def main():
     logger = log_getter(__name__)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["start", "list-nodes", "add-node"])
+    parser.add_argument("command", choices=["start", "list-nodes", "add-node", "upload", "download"])
     parser.add_argument("--node-id")
+    parser.add_argument("--file")
+    parser.add_argument("--key")
+    parser.add_argument("--output")
     args = parser.parse_args()
 
     network = StorageVirtualNetwork()
@@ -48,6 +51,28 @@ def main():
             coord.add_node(node)
             print(f"Node '{args.node_id}' added.")
 
+    elif args.command == "upload":
+        if not args.file:
+            print("Error: --file required")
+        else:
+            with open(args.file, "rb") as fh:
+                data = fh.read()
+            key = args.key or args.file
+            coord.upload(key, data)
+            print(f"Uploaded '{key}'")
+
+    elif args.command == "download":
+        if not args.key:
+            print("Error: --key required")
+        else:
+            data = coord.download(args.key)
+            if data is None:
+                print("File not found")
+            else:
+                out = args.output or args.key
+                with open(out, "wb") as fh:
+                    fh.write(data)
+                print(f"Downloaded to '{out}'")
 
 if __name__ == "__main__":
     main()

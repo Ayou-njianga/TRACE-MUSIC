@@ -4,6 +4,7 @@ from storage_node_base import StorageNodeBase
 from utils.logging_config import setup_logging
 from utils.decorators import log_exceptions
 from utils.config import load_config
+from utils.heartbeat_sender import HeartbeatSender
 
 cfg = load_config()
 log_getter = setup_logging()
@@ -26,6 +27,9 @@ class StorageVirtualNode(StorageNodeBase):
     ):
         super().__init__(node_id)
 
+        self.network = None  # will be set by coordinator/network
+        self.heartbeat = HeartbeatSender(self, cfg["node"]["heartbeat_interval"])
+
         self.cpu_capacity = cpu_capacity
         self.memory_capacity = memory_capacity
         self.storage_capacity = storage_capacity
@@ -35,6 +39,7 @@ class StorageVirtualNode(StorageNodeBase):
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
         logger.info(f"Node {self.node_id} initialized with storage at {self.data_dir}")
+
 
     def _path(self, key: str):
         safe = key.replace("/", "_")

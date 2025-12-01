@@ -3,6 +3,8 @@ from utils.logging_config import setup_logging
 from utils.config import load_config
 from utils.health import NodeRegistry
 from utils.exceptions import NodeNotFoundError
+import hashlib
+from utils.exceptions import StorageError
 
 log_getter = setup_logging()
 logger = log_getter(__name__)
@@ -53,6 +55,43 @@ class Coordinator:
                 "data": data
             })
 
+
+    def hash_data(self, data: bytes):
+        return hashlib.sha256(data).hexdigest()
+
+    def upload(self, key: str, data: bytes):
+        """
+        Upload a file into the distributed storage system.
+        Stored on the first node, then replicated.
+        """
+        # pick first node for storage
+        nodes = list(self.network.nodes.values())
+        if not nodes:
+            raise StorageError("No nodes available")
+
+        primary = nodes[0]
+
+        if not primary.store(key, data):
+            raise StorageError("Primary storage failed")
+
+        # replicate to others
+        self.replicate(key, data, exclude_node=primary.node_id)
+
+        logger.info(f"Upload complete for key '{key}'")
+        return True
+
+    def download(self, key: str):
+        """
+        Try retrieving from any node.
+        """
+        for node in self.network.nodes.values():
+            data = node.retrieve(key)
+            if data is not None:
+                logger.info(f"Retrieved '{key}' from {node.node_id}")
+                return data
+        return None
+
+
     def check_node_health(self):
         """
         Called periodically to detect dead nodes.
@@ -62,3 +101,5 @@ class Coordinator:
 
         for node_id in dead_nodes:
             logger.warning(f"Node '{node_id}' is offline")
+
+
