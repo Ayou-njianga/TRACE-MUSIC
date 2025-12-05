@@ -1,78 +1,31 @@
-import argparse
-import logging
-from coordinator import Coordinator
+# main_app.py
 from storage_virtual_network import StorageVirtualNetwork
 from storage_virtual_node import StorageVirtualNode
-from utils.config import load_config
-from utils.logging_config import setup_logging
+from coordinator import Coordinator
+from utils import db
 
+# Initialize DB (make sure db.init_db() was called elsewhere; db module does that in our dashboard)
+db.init_db()
 
-def build_sample_network(network):
-    """
-    Temporary testing network
-    """
-    n1 = StorageVirtualNode("node1")
-    n2 = StorageVirtualNode("node2")
+# Build network and coordinator
+NETWORK = StorageVirtualNetwork()
+COORD = Coordinator(NETWORK)
 
-    network.add_node(n1)
-    network.add_node(n2)
+# On startup, ensure nodes in DB are registered in network
+for n in db.list_nodes():
+    # create StorageVirtualNode (basic) and add to network and coordinator
+    node_obj = StorageVirtualNode(node_id=n['node_id'], memory_capacity=n.get('memory',1024))
+    NETWORK.add_node(node_obj)
+    COORD.add_node(node_obj)
 
+def add_node(node_id: str, memory: int=1024):
+    # Add DB entry
+    db.add_node_to_db(node_id, memory=memory, status="Online")
+    # Add actual node to network
+    node_obj = StorageVirtualNode(node_id=node_id, memory_capacity=memory)
+    NETWORK.add_node(node_obj)
+    COORD.add_node(node_obj)
+    return True
 
-def main():
-    cfg = load_config()
-    log_getter = setup_logging(
-        level=getattr(logging, cfg["logging"]["level"]),
-        logfile=cfg["logging"]["file"]
-    )
-    logger = log_getter(__name__)
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command", choices=["start", "list-nodes", "add-node", "upload", "download"])
-    parser.add_argument("--node-id")
-    parser.add_argument("--file")
-    parser.add_argument("--key")
-    parser.add_argument("--output")
-    args = parser.parse_args()
-
-    network = StorageVirtualNetwork()
-    coord = Coordinator(network)
-
-    build_sample_network(network)
-
-    if args.command == "start":
-        logger.info("TRACE-MUSIC system started")
-    elif args.command == "list-nodes":
-        print(coord.list_nodes())
-    elif args.command == "add-node":
-        if not args.node_id:
-            print("Error: --node-id required")
-        else:
-            node = StorageVirtualNode(args.node_id)
-            coord.add_node(node)
-            print(f"Node '{args.node_id}' added.")
-
-    elif args.command == "upload":
-        if not args.file:
-            print("Error: --file required")
-        else:
-            with open(args.file, "rb") as fh:
-                data = fh.read()
-            key = args.key or args.file
-            coord.upload(key, data)
-            print(f"Uploaded '{key}'")
-
-    elif args.command == "download":
-        if not args.key:
-            print("Error: --key required")
-        else:
-            data = coord.download(args.key)
-            if data is None:
-                print("File not found")
-            else:
-                out = args.output or args.key
-                with open(out, "wb") as fh:
-                    fh.write(data)
-                print(f"Downloaded to '{out}'")
-
-if __name__ == "__main__":
-    main()
+def list_nodes():
+    return db.list_nodes()
