@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import hashlib
-import yaml
+import yaml # type: ignore
 import threading
 import time
 import os
