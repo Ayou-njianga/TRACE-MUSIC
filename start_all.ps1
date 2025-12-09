@@ -3,15 +3,15 @@
 $root = Split-Path -Parent $MyInvocation.MyCommand.Definition
 
 Write-Host "Starting CloudRPC server..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location -Path \"$root\cloudrpc\"; ./start_cloudrpc.ps1"
+Start-Process powershell -ArgumentList "-NoExit","-Command","cd '$root\cloudrpc'; & '.\start_cloudrpc.ps1'"
 
 Start-Sleep -Milliseconds 500
 Write-Host "Starting AuthService..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location -Path \"$root\AuthService\"; ./start_authservice.ps1"
+Start-Process powershell -ArgumentList "-NoExit","-Command","cd '$root\AuthService'; & '.\start_authservice.ps1'"
 
 Start-Sleep -Milliseconds 500
 Write-Host "Starting Backend (REST API)..." -ForegroundColor Green
-Start-Process powershell -ArgumentList "-NoExit","-Command","Set-Location -Path \"$root\backend\"; ./start_backend.ps1"
+Start-Process powershell -ArgumentList "-NoExit","-Command","cd '$root\backend'; & '.\start_backend.ps1'"
 
 Write-Host "All services launched. Waiting for backend to be ready..." -ForegroundColor Yellow
 Start-Sleep -Seconds 4
@@ -22,3 +22,6 @@ Write-Host "Opening client portal: $clientUrl" -ForegroundColor Cyan
 Start-Process $clientUrl
 
 Write-Host "If any service fails to start, check the individual start scripts in each folder." -ForegroundColor Magenta
+
+#cd 'C:\Users\AYOUBA\StudioProjects\TRACE-MUSIC\backend'
+#python -m uvicorn api:app --host 0.0.0.0 --port 8000

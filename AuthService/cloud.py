@@ -206,7 +206,7 @@ class UserServiceSkeleton(cloudsecurity_pb2_grpc.UserServiceServicer):
 def run():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     cloudsecurity_pb2_grpc.add_UserServiceServicer_to_server(UserServiceSkeleton(), server)
-    server.add_insecure_port('[::]:51234')
+    server.add_insecure_port('0.0.0.0:51234')
     print('Starting Server on port 51234 ............', end='')
     server.start()
     print('[OK]')
@@ -214,3 +214,4 @@ def run():
 
 if __name__ == '__main__':
     run()
+

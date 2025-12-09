@@ -41,5 +41,12 @@
     "quota_bytes": 1073741824,
     "used_bytes": 0,
     "files": []
+  },
+  "testuser": {
+    "email": "test@example.com",
+    "password_hash": "$2b$12$Qp9aaw33ZWzzFgfmj0R02OVXRsAxCOOWjwndnzHkrbneG4yHYYcrq",
+    "quota_bytes": 5368709120,
+    "used_bytes": 0,
+    "files": []
   }
 }

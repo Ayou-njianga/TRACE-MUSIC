@@ -510,7 +510,7 @@ class CloudSimServicer(cloudsim_pb2_grpc.CloudSimServicer):
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     cloudsim_pb2_grpc.add_CloudSimServicer_to_server(CloudSimServicer(), server)
-    server.add_insecure_port('[::]:50051')
+    server.add_insecure_port('0.0.0.0:50051')
     server.start()
     try:
         while True:

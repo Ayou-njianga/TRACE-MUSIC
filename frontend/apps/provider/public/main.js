@@ -36,26 +36,34 @@ function setLoading(element, loading) {
 }
 
 function renderShell() {
-  const head = `
-    <header>
-      <div class="row">
-        <strong>CloudSim Provider Portal</strong>
-        <span class="muted" id="summary"></span>
+  const sidebar = `
+    <div class="sidebar">
+      <div class="logo">
+        <h2>CloudSim</h2>
+        <p>Admin Portal</p>
       </div>
-      <nav>
-        <a href="#/dashboard" data-route="dashboard">Dashboard</a>
-        <a href="#/nodes" data-route="nodes">Nodes</a>
-        <a href="#/metrics" data-route="metrics">Metrics</a>
-        <a href="#/users" data-route="users">Users</a>
-      </nav>
-    </header>
+      <div class="nav-section">
+        <div class="nav-section-title">Management</div>
+        <a href="#/dashboard" class="nav-item" data-route="dashboard">📊 Dashboard</a>
+        <a href="#/nodes" class="nav-item" data-route="nodes">🖥️ Nodes</a>
+        <a href="#/metrics" class="nav-item" data-route="metrics">📈 Metrics</a>
+        <a href="#/users" class="nav-item" data-route="users">👥 Users</a>
+      </div>
+      <div class="nav-section" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+        <a href="#/logout" class="nav-item" data-route="logout" style="color: #e74c3c;">🚪 Logout</a>
+      </div>
+    </div>
   `
-  const main = `<main id="view"></main>`
-  app.innerHTML = head + main
+  const main = `
+    <div class="main-content">
+      <div id="view"></div>
+    </div>
+  `
+  app.innerHTML = sidebar + main
 }
 
 function setActive(route) {
-  document.querySelectorAll('nav a').forEach(a => {
+  document.querySelectorAll('.nav-item').forEach(a => {
     if (a.getAttribute('data-route') === route) a.classList.add('active')
     else a.classList.remove('active')
   })
