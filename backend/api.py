@@ -1,5 +1,4 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Body
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 from fastapi.responses import JSONResponse, StreamingResponse, RedirectResponse
@@ -34,15 +33,6 @@ import cloudsim_pb2
 import cloudsim_pb2_grpc
 
 app = FastAPI(title="CloudSim REST Gateway (gRPC-backed)")
-
-# Enable CORS for all origins (frontend can make requests from any origin)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 loader = ConfigLoader(os.path.join(base_dir, 'config.yaml'))
 loader.load()
