@@ -1,0 +1,38 @@
+{
+  "Christian Cyril": {
+    "email": "seignoucyril@gmail.com",
+    "password_hash": "$2b$12$.Yz4cuawSTP1hJXqDgjTQup3Fwa3y7j65UNgXVTgOJ1VmJQLvPyg.",
+    "quota_bytes": 2147483648,
+    "used_bytes": 204737062,
+    "files": [
+      {
+        "file_id": "8ebf7f50e6b5092b255245731e686da7",
+        "name": "Project Report(SEIGNOU MBI CHRISTIAN CYRIL-ICTU20223506).pdf",
+        "size": 818379,
+        "nodes": [
+          "node4",
+          "node6",
+          "node3",
+          "node1",
+          "node5",
+          "node2"
+        ]
+      },
+      {
+        "file_id": "17287b99ec122c7a1b54bf249659a8fd",
+        "name": "Modern.Family.S05E01.Suddenly.Last.Summer.WEB-DL.x264.AAC.mp4",
+        "size": 203918683,
+        "nodes": [
+          "node4",
+          "node6",
+          "node3",
+          "node1",
+          "node8",
+          "node7",
+          "node5",
+          "node2"
+        ]
+      }
+    ]
+  }
+}
