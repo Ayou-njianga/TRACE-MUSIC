@@ -1,8 +1,9 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Body
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
-from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse, StreamingResponse, RedirectResponse
+from starlette.staticfiles import StaticFiles
 import os
 import sys
 import socket
@@ -33,6 +34,15 @@ import cloudsim_pb2
 import cloudsim_pb2_grpc
 
 app = FastAPI(title="CloudSim REST Gateway (gRPC-backed)")
+
+# Enable CORS for all origins (frontend can make requests from any origin)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 loader = ConfigLoader(os.path.join(base_dir, 'config.yaml'))
 loader.load()
@@ -359,6 +369,12 @@ if os.path.isdir(client_dir):
     app.mount('/client', StaticFiles(directory=client_dir, html=True), name='client')
 if os.path.isdir(provider_dir):
     app.mount('/provider', StaticFiles(directory=provider_dir, html=True), name='provider')
+
+
+# Root -> redirect to client portal for convenience
+@app.get("/")
+def root_redirect():
+    return RedirectResponse(url='/client/')
 
 
 @app.get("/status")

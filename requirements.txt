@@ -1,0 +1,8 @@
+fastapi>=0.95.0
+uvicorn[standard]>=0.22.0
+grpcio>=1.56.0
+protobuf>=4.24.0
+pydantic>=1.10.0
+bcrypt>=4.0.0
+PyYAML>=6.0
+requests>=2.0.0

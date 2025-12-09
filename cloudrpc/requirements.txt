@@ -1,0 +1,11 @@
+# CloudRPC gRPC Server - Python Dependencies
+# Requires CloudSim
+
+# gRPC for service communication
+grpcio>=1.59.0
+grpcio-tools>=1.59.0
+
+# Configuration
+pyyaml>=6.0
+
+# Note: CloudSim modules are imported from ../CloudSim path

@@ -1,0 +1,12 @@
+# AuthService - Python Dependencies
+# Requires gRPC services
+
+# gRPC for service communication
+grpcio>=1.59.0
+grpcio-tools>=1.59.0
+
+# Password hashing and security
+bcrypt>=4.0.0
+
+# Note: All other dependencies are from Python standard library:
+# - json, os, uuid, time, threading, hashlib, base64, etc.

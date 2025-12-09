@@ -1,0 +1,9 @@
+{
+    "python-envs.pythonProjects": [],
+    "python.analysis.extraPaths": [
+        "./AuthService",
+        "./CloudSim",
+        "./cloudrpc"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:system"
+}
