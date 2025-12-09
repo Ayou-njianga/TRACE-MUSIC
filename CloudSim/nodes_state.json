@@ -1,0 +1,100 @@
+{
+  "nodes": [
+    {
+      "node_id": "node1",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5000,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node2",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5001,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node3",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5002,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node4",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5003,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node5",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5004,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node6",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5005,
+      "ip_address": "10.236.232.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node7",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5007,
+      "ip_address": "10.32.65.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    },
+    {
+      "node_id": "node8",
+      "cpu_capacity": 2,
+      "memory_capacity": 2,
+      "storage_capacity": 2,
+      "bandwidth": 100,
+      "host": "localhost",
+      "port": 5006,
+      "ip_address": "10.32.65.162",
+      "mac_address": "34:6f:24:e7:a7:4c",
+      "enable_network_check": true
+    }
+  ]
+}
