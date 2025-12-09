@@ -1,4 +1,4 @@
 
-from_email = "seignoucyril@gmail.com"
+from_email = "njianga.ayouba@ictuniversity.edu.cm"
 from_password = ""
-app_password = "zyoh ifsg nfvc zxwc"
+app_password = "zvbb gqax wvta hqci"

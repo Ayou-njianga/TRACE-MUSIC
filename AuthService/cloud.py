@@ -63,23 +63,46 @@ class UserServiceSkeleton(cloudsecurity_pb2_grpc.UserServiceServicer):
         if not bcrypt.checkpw(request.password.encode('utf-8'), user['password_hash'].encode('utf-8')):
             return cloudsecurity_pb2.LoginResponse(result="Unauthorized", pending_id="")
         email = user.get('email')
+        # Generate OTP before sending
+        from utils import generate_otp
+        otp_code = generate_otp()
         # Send OTP in background to avoid blocking
         import threading
-        threading.Thread(target=send_otp, args=(email,), daemon=True).start()
+        threading.Thread(target=send_otp, args=(email, otp_code), daemon=True).start()
         pending_id = str(uuid.uuid4())
         self.pending_otp[request.login] = {
             'pending_id': pending_id,
+            'otp_code': otp_code,
+            'email': email,
             'expires_at': time.time() + 300
         }
+        print(f"[LOGIN] OTP generated for {request.login}: {otp_code} (expires in 5 min)")
         return cloudsecurity_pb2.LoginResponse(result="OTP sent", pending_id=pending_id)
 
     def VerifyOtp(self, request, context):
-        # In a real system, we would verify the OTP code persisted server-side
+        # Verify the OTP code with stored data
         pending = self.pending_otp.get(request.login)
-        if not pending or pending['pending_id'] != request.pending_id or time.time() > pending['expires_at']:
+        if not pending:
+            print(f"[VERIFY_OTP] No pending OTP for user {request.login}")
             return cloudsecurity_pb2.AuthToken(token="")
-        # Issue a simple opaque token
+        
+        if pending['pending_id'] != request.pending_id:
+            print(f"[VERIFY_OTP] Invalid pending_id for user {request.login}")
+            return cloudsecurity_pb2.AuthToken(token="")
+        
+        if time.time() > pending['expires_at']:
+            print(f"[VERIFY_OTP] OTP expired for user {request.login}")
+            del self.pending_otp[request.login]
+            return cloudsecurity_pb2.AuthToken(token="")
+        
+        if pending['otp_code'] != request.otp:
+            print(f"[VERIFY_OTP] Invalid OTP code for user {request.login} (expected {pending['otp_code']}, got {request.otp})")
+            return cloudsecurity_pb2.AuthToken(token="")
+        
+        # OTP verified successfully - issue authentication token
         token = str(uuid.uuid4())
+        print(f"[VERIFY_OTP] OTP verified for user {request.login}, token issued")
+        del self.pending_otp[request.login]
         return cloudsecurity_pb2.AuthToken(token=token)
 
     def GetProfile(self, request, context):

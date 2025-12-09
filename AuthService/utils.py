@@ -13,13 +13,28 @@ def hash_password(password):
 def generate_otp():
     return str(random.randint(100000, 999999))
 
-def send_otp(to_email) -> str:
-
-    otp = generate_otp()
+def send_otp(to_email, otp_code=None) -> str:
+    """
+    Send OTP code to user's email.
+    If otp_code is not provided, a new one is generated.
+    """
+    if otp_code is None:
+        otp_code = generate_otp()
 
     # Sender configuration
-    subject = "Your OTP Code for the cloud security simulator"
-    body = f"Your OTP code is: {otp}"
+    subject = "Your OTP Code for TRACE-MUSIC Cloud Storage"
+    body = f"""
+Dear User,
+
+Your OTP code for TRACE-MUSIC Cloud Storage is: {otp_code}
+
+This code will expire in 5 minutes.
+
+If you did not request this code, please ignore this email.
+
+Best regards,
+TRACE-MUSIC Team
+    """
 
     # Create the email
     msg = MIMEMultipart()
@@ -35,21 +50,21 @@ def send_otp(to_email) -> str:
         # Connect and send email with timeout
         server = smtplib.SMTP('smtp.gmail.com', 587, timeout=5)
         try:
-            print(f"Starting tls session on smtp.gmail.com:587 .........", end='')
+            print(f"[EMAIL] Starting TLS session on smtp.gmail.com:587 .........", end='')
             server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
             print('[OK]')
-            print(f"login to the server with {email_from} .........", end='')
+            print(f"[EMAIL] Authenticating with {email_from} .........", end='')
             server.login(email_from, email_pass)
             print('[OK]')
-            print(f"Sending OTP data to {to_email}  .........", end='')
+            print(f"[EMAIL] Sending OTP to {to_email} .........", end='')
             server.send_message(msg)
             print('[OK]')
-            print(f"OTP data sent to {to_email} successfully!")
-            return f"OTP data sent to your email: {to_email} successfully!"
+            print(f"[EMAIL] OTP sent to {to_email} successfully! (Code: {otp_code})")
+            return f"OTP sent to your email: {to_email} successfully!"
         finally:
             server.quit()
     except Exception as e:
-        print(f"Failed to send email: {e}")
+        print(f"[EMAIL] Failed to send email to {to_email}: {e}")
         # Return None or empty string to indicate failure, but don't block
         return None
 

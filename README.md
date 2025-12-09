@@ -1,106 +1,104 @@
-# TRACE-MUSIC - Distributed Cloud Storage Platform
+# TRACE-MUSIC
 
-A distributed cloud-based storage platform for the Cameroon music industry, featuring redundant storage across virtual cloud nodes with REST API, gRPC services, and user authentication.
+Distributed cloud storage simulation for the Cameroon music industry. TRACE-MUSIC provides a REST gateway, gRPC services, and a browser-based frontend to create and manage virtual storage nodes, upload/download files split into chunks and replicated across nodes, and monitor system metrics.
 
-## Overview
+This repository contains three main subsystems:
 
-TRACE-MUSIC is a full-stack distributed storage system that simulates a cloud infrastructure with multiple storage nodes. It provides:
+- CloudSim: core simulation and node implementations
+- cloudrpc: gRPC server that controls node lifecycle and the network discovery service
+- AuthService: gRPC-based authentication and user/account/quota management
+- backend: FastAPI REST gateway that exposes operations to web clients and proxies gRPC operations
+- frontend: static client and provider portals (HTML + JS)
 
-- **Distributed Storage**: Files split into chunks and replicated across multiple virtual nodes
-- **REST API**: FastAPI-based REST gateway for file operations and system management
-- **gRPC Services**: 
-  - CloudRPC server for node and network management
-  - AuthService for user authentication, OTP verification, and quota management
-- **Frontend**: Client and Provider web portals (HTML/JS)
-- **Metrics & Monitoring**: Real-time performance metrics, throughput, latency tracking
-- **Capacity Planning**: Automatic capacity evaluation and alerting
+## Quick Start (Windows)
 
-## Project Structure
+Prerequisites:
 
-```
-TRACE-MUSIC/
-├── CloudSim/                    # Core distributed storage system
-│   ├── main.py                  # CLI interface
-│   ├── config.yaml              # System configuration
-│   ├── node_factory.py          # Virtual node creation and lifecycle
-│   ├── storage_virtual_node.py  # Storage node implementation
-│   ├── network_manager.py       # Node-to-node communication
-│   ├── network_service.py       # Network discovery service
-│   ├── metrics_collector.py     # Performance metrics collection
-│   ├── capacity_evaluator.py    # Capacity planning and prediction
-│   ├── logger.py                # Logging utilities
-│   ├── config_loader.py         # Config file parsing
-│   ├── nodes_state.json         # Persistent node state
-│   ├── requirements.txt          # Python dependencies
-│   └── tests/                    # Unit tests
-├── backend/
-│   ├── api.py                   # FastAPI REST gateway (2200+ lines)
-│   ├── start_backend.ps1        # Backend startup script
-│   └── __pycache__/
-├── cloudrpc/                    # gRPC server for CloudSim
-│   ├── server.py                # CloudRPC gRPC server
-│   ├── cloudsim.proto           # Service definitions
-│   ├── cloudsim_pb2.py          # Compiled protobuf messages
-│   ├── cloudsim_pb2_grpc.py     # Compiled gRPC stubs
-│   ├── start_cloudrpc.ps1       # CloudRPC startup script
-│   └── __pycache__/
-├── AuthService/                 # Authentication and user management
-│   ├── cloud.py                 # AuthService gRPC server
-│   ├── cloudsecurity.proto      # Auth service definitions
-│   ├── cloudsecurity_pb2.py     # Compiled protobuf messages
-│   ├── cloudsecurity_pb2_grpc.py # Compiled gRPC stubs
-│   ├── params.py                # Service parameters
-│   ├── params.template.py       # Parameter template
-│   ├── utils.py                 # Auth utilities (OTP, hashing)
-│   ├── users.json               # User database
-│   ├── start_authservice.ps1    # AuthService startup script
-│   └── __pycache__/
-├── frontend/
-│   └── apps/
-│       ├── client/              # Client portal
-│       │   └── public/
-│       │       ├── index.html   # Client web interface
-│       │       └── main.js      # Client JavaScript logic
-│       └── provider/             # Provider portal
-│           └── public/
-│               ├── index.html   # Provider web interface
-│               └── main.js      # Provider JavaScript logic
-├── node1_storage/               # Storage directory for virtual nodes
-├── start_all.ps1                # Launch all services in one command
-└── README.md                    # This file
+- Python 3.10+ installed and on PATH
+- PowerShell (Windows) - scripts provided are PowerShell scripts
+- Optional: Create a virtual environment for isolation
+
+1) From repository root, create and activate a venv (optional but recommended):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 ```
 
-## System Architecture
+2) Install Python dependencies (recommended install in the venv):
 
+```powershell
+pip install fastapi uvicorn grpcio grpcio-tools pydantic pyyaml
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                      Web Browsers                            │
-│         (Client Portal & Provider Portal)                    │
-└────────────────┬────────────────────────────────────────────┘
-                 │ HTTP/REST (Port 8000)
-┌────────────────▼────────────────────────────────────────────┐
-│                  Backend REST API (FastAPI)                  │
-│                 - File Upload/Download                       │
-│                 - Node Management                            │
-│                 - Metrics & Monitoring                       │
-│                 - Static File Serving                        │
-└────┬──────────────────────────────┬──────────────────────────┘
-     │ gRPC (Port 50051)            │ gRPC (Port 51234)
-     │                              │
-┌────▼──────────────┐      ┌────────▼──────────────┐
-│  CloudRPC Server  │      │   AuthService        │
-│  - Node Control   │      │   - User Mgmt        │
-│  - Network Mgmt   │      │   - OTP Verify       │
-│  (Port 50051)     │      │   - Quota Check      │
-└────┬──────────────┘      │   (Port 51234)       │
-     │ TCP Network          └──────────────────────┘
-     │
-┌────▼────────────────────────────────────────────────┐
-│         Virtual Nodes Network (Port 5000+)          │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │  Node 1  │  │  Node 2  │  │  Node N  │          │
-│  │  Storage │  │  Storage │  │  Storage │          │
-│  └──────────┘  └──────────┘  └──────────┘          │
+
+3) Start the whole stack (opens separate PowerShell windows and the client in your browser):
+
+```powershell
+.\start_all.ps1
+```
+
+You can also start subsystems individually:
+
+- Start CloudRPC (gRPC control & network): `cloudrpc\start_cloudrpc.ps1`
+- Start AuthService (user mgmt): `AuthService\start_authservice.ps1`
+- Start REST backend: `backend\start_backend.ps1`
+
+The REST backend listens on `127.0.0.1:8000`; the client portal is served at `http://127.0.0.1:8000/client/`.
+
+## Project Layout
+
+Top-level folders and their purpose:
+
+- `CloudSim/` — core simulation code (node factory, virtual node, storage/metrics/capacity, tests)
+- `cloudrpc/` — gRPC server and proto definitions for managing nodes and the virtual network
+- `AuthService/` — authentication gRPC service and its protobufs
+- `backend/` — FastAPI REST gateway; serves the frontend static files under `/client` and `/provider`
+- `frontend/apps/` — static client and provider portals in `public/`
+
+Key files:
+
+- `start_all.ps1` — convenience script to launch all services and open the client
+- `backend/api.py` — REST API gateway (mounts static files and proxies to gRPC services)
+- `cloudrpc/server.py` — gRPC CloudRPC service (node lifecycle + network)
+- `AuthService/cloud.py` — AuthService gRPC implementation
+
+## How storage works (high level)
+
+1. Files uploaded via REST are split into chunks.
+2. Each chunk is replicated across several virtual nodes (replication factor configurable).
+3. Nodes either run as local threads/processes (via `CloudSim` node factory) or are controlled via `cloudrpc` (gRPC) for multi-process setups.
+4. Nodes expose a small TCP protocol to receive/store chunks and to serve them back for downloads.
+
+## Tests
+
+Unit tests for the simulation are under `CloudSim/tests/`. Run them with `pytest` from the repository root after installing test dependencies.
+
+```powershell
+pip install pytest
+pytest CloudSim/tests
+```
+
+## Troubleshooting
+
+- If the backend cannot connect to the gRPC servers, ensure `cloudrpc` and `AuthService` windows are started and show no errors.
+- If ports conflict, check `CloudSim/config.yaml` and the start scripts for port assignments.
+- If static frontend files don’t load, confirm the backend is running on port `8000` and that `frontend/apps/client/public` exists.
+
+## Development notes
+
+- The REST gateway (`backend/api.py`) attempts to use gRPC for node/network operations and falls back to direct `CloudSim` factory calls when gRPC is unavailable.
+- Configuration is loaded from `CloudSim/config.yaml`. Adjust replication and storage defaults there.
+
+## Contributing
+
+See `CONTRIBUTING.md` for contribution guidelines, branch/PR policy and testing expectations.
+
+## License & Contact
+
+Add your preferred license file to the repository (e.g., `LICENSE`). For questions or help, open an issue in this repository.
+
+----
+Updated documentation and quickstart for the TRACE-MUSIC project.
 │    Chunks       Chunks         Chunks               │
 └────────────────────────────────────────────────────┘
 ```
