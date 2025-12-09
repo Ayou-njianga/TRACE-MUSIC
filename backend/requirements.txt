@@ -1,0 +1,18 @@
+# Backend REST API Server - Python Dependencies
+# Requires CloudSim and gRPC services
+
+# Web framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+
+# Data validation
+pydantic>=2.0.0
+
+# Protocol Buffers for gRPC
+grpcio>=1.59.0
+grpcio-tools>=1.59.0
+
+# Configuration
+pyyaml>=6.0
+
+# Note: CloudSim modules are imported from ../CloudSim path
